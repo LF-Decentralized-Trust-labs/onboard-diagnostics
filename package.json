@@ -12,7 +12,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist",
-    "doctor": "node dist/index.js doctor"
+    "doctor": "node dist/index.js doctor",
+    "test": "npm run build && npm run test:doctor",
+    "test:doctor": "node --test test/doctor.test.mjs"
   },
   "keywords": [
     "onboarding",
