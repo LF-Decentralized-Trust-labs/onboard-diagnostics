@@ -5,7 +5,7 @@
 ```text
 $ idoa doctor
 IDOA doctor
-Implementation track: Onboarding Diagnostics Lab
+Track: Onboarding Diagnostics Lab
 Version: 0.1.0
 Generated: 2026-04-14T10:00:00.000Z
 Adapter: core

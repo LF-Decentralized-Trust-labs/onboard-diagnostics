@@ -61,7 +61,7 @@ async function readVersion(): Promise<string> {
 
 function printHumanReport(report: DoctorReport) {
   process.stdout.write("IDOA doctor\n");
-  process.stdout.write("Implementation track: Onboarding Diagnostics Lab\n");
+  process.stdout.write("Track: Onboarding Diagnostics Lab\n");
   process.stdout.write(`Version: ${report.version}\n`);
   process.stdout.write(`Generated: ${report.generated_at}\n`);
   process.stdout.write(`Adapter: ${report.adapter ?? "core"}\n\n`);

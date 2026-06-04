@@ -8,6 +8,10 @@ import { join } from "node:path";
 
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
 const cliPath = join(repoRoot, "dist/index.js");
+const preflightPath = join(repoRoot, "scripts/preflight.sh");
+const posixShellPath = "/bin/sh";
+const skipPreflightTests =
+  process.platform === "win32" ? "scripts/preflight.sh requires a POSIX shell" : false;
 
 function runDoctor({
   args = [],
@@ -45,6 +49,23 @@ function createWorkspaceFixture() {
   return fixtureDir;
 }
 
+function runPreflight({
+  cwd = repoRoot,
+  env = process.env
+} = {}) {
+  const result = spawnSync(posixShellPath, [preflightPath], {
+    cwd,
+    env,
+    encoding: "utf8"
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return result;
+}
+
 test("doctor human-readable output shows PASS and WARN markers for a controlled workspace", (t) => {
   const fixtureDir = createWorkspaceFixture();
   t.after(() => rmSync(fixtureDir, { recursive: true, force: true }));
@@ -54,6 +75,7 @@ test("doctor human-readable output shows PASS and WARN markers for a controlled 
   assert.equal(result.status, 0);
   assert.equal(result.stderr, "");
   assert.match(result.stdout, /^IDOA doctor/m);
+  assert.match(result.stdout, /^Track: Onboarding Diagnostics Lab$/m);
   assert.match(result.stdout, /\[PASS\]/);
   assert.match(result.stdout, /\[WARN\]/);
   assert.match(result.stdout, /Summary: PASS=\d+ WARN=\d+ FAIL=0/);
@@ -126,4 +148,44 @@ test("doctor JSON output includes FAIL results when PATH is intentionally empty"
   assert.ok(Array.isArray(report.results));
   assert.ok(report.summary.fail > 0);
   assert.ok(report.results.some((result) => result.status === "FAIL"));
+});
+
+test("preflight human-readable output follows doctor-style result blocks", { skip: skipPreflightTests }, () => {
+  const result = runPreflight();
+
+  assert.equal(result.status, 0);
+  assert.equal(result.stderr, "");
+  assert.match(result.stdout, /^IDOA preflight/m);
+  assert.match(result.stdout, /^Track: Onboarding Diagnostics Lab$/m);
+  assert.match(result.stdout, /^\[PASS\] Node\.js availability$/m);
+  assert.match(result.stdout, /^  id: preflight:node-available$/m);
+  assert.match(result.stdout, /^  category: DEPENDENCY$/m);
+  assert.match(result.stdout, /^  summary: Node\.js is available on PATH\.$/m);
+  assert.match(result.stdout, /^  details: Resolved node at .+$/m);
+  assert.match(result.stdout, /^Summary: PASS=\d+ WARN=\d+ FAIL=0$/m);
+  assert.doesNotMatch(result.stdout, /^PASS\s{2,}/m);
+  assert.doesNotMatch(result.stdout, /zero-dependency baseline checks|intentionally runs/);
+});
+
+test("preflight human-readable output shows FAIL blocks and summary when PATH is empty", {
+  skip: skipPreflightTests
+}, () => {
+  const result = runPreflight({
+    env: {
+      ...process.env,
+      PATH: "",
+      SHELL: ""
+    }
+  });
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stderr, "");
+  assert.match(result.stdout, /^\[FAIL\] Node\.js availability$/m);
+  assert.match(
+    result.stdout,
+    /^  suggested_fix: Install Node\.js and ensure it is visible in PATH before rerunning diagnostics\.$/m
+  );
+  assert.match(result.stdout, /^\[FAIL\] PATH readiness$/m);
+  assert.match(result.stdout, /^Summary: PASS=\d+ WARN=\d+ FAIL=3$/m);
+  assert.doesNotMatch(result.stdout, /^FAIL\s{2,}/m);
 });
