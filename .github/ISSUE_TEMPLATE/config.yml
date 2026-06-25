@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: https://hackerone.com/hyperledger?type=team
+    about: Please do not open public security issues.
+  - name: LF Decentralized Trust Code of Conduct
+    url: https://www.lfdecentralizedtrust.org/code-of-conduct
+    about: Use the LFDT process for conduct concerns.

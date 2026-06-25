@@ -1,0 +1,11 @@
+# Default review owner for the project.
+* @Mateja3m
+
+# Governance and community documentation.
+/.github/ @Mateja3m
+/CONTRIBUTING.md @Mateja3m
+/CODE_OF_CONDUCT.md @Mateja3m
+/GOVERNANCE.md @Mateja3m
+/SECURITY.md @Mateja3m
+/ROADMAP.md @Mateja3m
+/docs/ @Mateja3m
