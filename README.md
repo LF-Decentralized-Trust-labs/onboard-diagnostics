@@ -68,7 +68,7 @@ Current `doctor` checks stay intentionally small and implementation-aligned:
 - formalize the adapter contract and add first Fabric-oriented checks
 - improve remediation guidance and report shaping without widening scope
 
-A compact phase-based version is in [roadmap.md](docs/roadmap.md).
+A compact project roadmap is in [ROADMAP.md](ROADMAP.md).
 
 ## Usage
 
