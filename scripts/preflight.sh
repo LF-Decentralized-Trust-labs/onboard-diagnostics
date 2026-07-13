@@ -9,7 +9,7 @@ WARN_COUNT=0
 FAIL_COUNT=0
 
 print_result() {
-  status="$1"
+  result_status="$1"
   id="$2"
   title="$3"
   category="$4"
@@ -17,7 +17,7 @@ print_result() {
   details="$6"
   suggested_fix="${7:-}"
 
-  case "$status" in
+  case "$result_status" in
     PASS)
       PASS_COUNT=$((PASS_COUNT + 1))
       ;;
@@ -30,7 +30,7 @@ print_result() {
       ;;
   esac
 
-  printf '[%s] %s\n' "$status" "$title"
+  printf '[%s] %s\n' "$result_status" "$title"
   printf '  id: %s\n' "$id"
   printf '  category: %s\n' "$category"
   printf '  summary: %s\n' "$summary"
@@ -70,31 +70,105 @@ check_command() {
   return 1
 }
 
+check_path() {
+  if [ -z "${PATH:-}" ]; then
+    print_result \
+      "FAIL" \
+      "preflight:path-sane" \
+      "PATH sanity" \
+      "ENVIRONMENT" \
+      "PATH is empty or unset." \
+      "A missing PATH prevents command resolution and makes onboarding failures hard to interpret." \
+      "Set PATH in the active shell session before rerunning diagnostics."
+    return
+  fi
+
+  path_remainder="${PATH}:"
+  valid_entries=0
+  missing_entries=0
+  empty_entries=0
+
+  while [ -n "$path_remainder" ]; do
+    path_entry=${path_remainder%%:*}
+    path_remainder=${path_remainder#*:}
+
+    if [ -z "$path_entry" ]; then
+      empty_entries=$((empty_entries + 1))
+    elif [ -d "$path_entry" ]; then
+      valid_entries=$((valid_entries + 1))
+    else
+      missing_entries=$((missing_entries + 1))
+    fi
+  done
+
+  if [ "$valid_entries" -eq 0 ]; then
+    print_result \
+      "FAIL" \
+      "preflight:path-sane" \
+      "PATH sanity" \
+      "ENVIRONMENT" \
+      "PATH does not contain an existing directory." \
+      "Inspected PATH entries but none resolve to an existing directory." \
+      "Add the system and tool directories used by the active shell to PATH."
+  elif [ "$missing_entries" -gt 0 ] || [ "$empty_entries" -gt 0 ]; then
+    print_result \
+      "WARN" \
+      "preflight:path-sane" \
+      "PATH sanity" \
+      "ENVIRONMENT" \
+      "PATH contains entries that may make command resolution unreliable." \
+      "Found $valid_entries existing, $missing_entries missing, and $empty_entries empty PATH entries." \
+      "Remove missing or empty entries from PATH, then start a new shell session."
+  else
+    print_result \
+      "PASS" \
+      "preflight:path-sane" \
+      "PATH sanity" \
+      "ENVIRONMENT" \
+      "PATH contains only existing directories." \
+      "Validated $valid_entries PATH entries for the current shell session."
+  fi
+}
+
+check_shell() {
+  if [ -n "${SHELL:-}" ] && command -v "$SHELL" >/dev/null 2>&1; then
+    shell_path=$(command -v "$SHELL")
+    print_result \
+      "PASS" \
+      "preflight:shell-available" \
+      "Shell availability" \
+      "ENVIRONMENT" \
+      "The configured shell is available." \
+      "Resolved SHELL to $shell_path."
+  elif command -v sh >/dev/null 2>&1; then
+    fallback_shell_path=$(command -v sh)
+    print_result \
+      "WARN" \
+      "preflight:shell-available" \
+      "Shell availability" \
+      "ENVIRONMENT" \
+      "A POSIX shell is available, but SHELL is unset or cannot be resolved." \
+      "Resolved sh at $fallback_shell_path while SHELL is not usable." \
+      "Set SHELL to the executable for the shell used by the current session."
+  else
+    print_result \
+      "FAIL" \
+      "preflight:shell-available" \
+      "Shell availability" \
+      "ENVIRONMENT" \
+      "No configured or fallback shell can be resolved." \
+      "SHELL is unset or unavailable, and sh is not visible in PATH." \
+      "Install a POSIX-compatible shell and ensure it is visible in PATH."
+  fi
+}
+
 printf 'IDOA preflight\n'
 printf 'Track: Onboarding Diagnostics Lab\n'
 printf 'Layer: preflight\n\n'
 
 check_command "node" "preflight:node-available" "Node.js availability" "Node.js"
 check_command "npm" "preflight:npm-available" "npm availability" "npm"
-
-if [ -n "${PATH:-}" ]; then
-  print_result \
-    "PASS" \
-    "preflight:path-visible" \
-    "PATH readiness" \
-    "ENVIRONMENT" \
-    "PATH is set for the current shell session." \
-    "PATH is non-empty and can be used for command resolution."
-else
-  print_result \
-    "FAIL" \
-    "preflight:path-visible" \
-    "PATH readiness" \
-    "ENVIRONMENT" \
-    "PATH is empty or unset." \
-    "A missing PATH prevents command resolution and makes onboarding failures hard to interpret." \
-    "Set PATH in the active shell session before rerunning diagnostics."
-fi
+check_path
 
 if command -v node >/dev/null 2>&1; then
   if node_version=$(node -v 2>/dev/null); then
@@ -151,26 +225,11 @@ else
     "Working directory writability" \
     "PERMISSIONS" \
     "Current working directory is not writable." \
-    "Some onboarding workflows may need write access in the current directory."
+    "Some onboarding workflows may need write access in the current directory." \
+    "Move to a writable working directory or update its permissions before installing project dependencies."
 fi
 
-if [ -n "${SHELL:-}" ]; then
-  print_result \
-    "PASS" \
-    "preflight:shell-visible" \
-    "Shell visibility" \
-    "ENVIRONMENT" \
-    "SHELL is set for the current session." \
-    "Detected SHELL as $SHELL."
-else
-  print_result \
-    "WARN" \
-    "preflight:shell-visible" \
-    "Shell visibility" \
-    "ENVIRONMENT" \
-    "SHELL is not set for the current session." \
-    "A missing SHELL value can make shell-specific onboarding failures harder to interpret."
-fi
+check_shell
 
 printf 'Summary: PASS=%s WARN=%s FAIL=%s\n' "$PASS_COUNT" "$WARN_COUNT" "$FAIL_COUNT"
 
