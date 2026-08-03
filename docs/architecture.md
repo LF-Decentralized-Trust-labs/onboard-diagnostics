@@ -37,6 +37,18 @@ Each adapter should:
 - reuse the shared check result model
 - add scoped checks for a specific onboarding target
 
+The TypeScript contract is intentionally small:
+
+```ts
+interface DiagnosticAdapter {
+  readonly name: string;
+  readonly description: string;
+  run(context: AdapterContext): Promise<readonly DiagnosticCheckResult[]>;
+}
+```
+
+`AdapterContext` exposes only the current working directory and environment. Adapter results use the same `DiagnosticCheckResult` shape and `PASS`, `WARN`, or `FAIL` statuses as core diagnostics. Adding an adapter means implementing this interface and including it in the small built-in adapter list; it does not introduce runtime plugin loading or a multi-chain abstraction.
+
 The current initial direction is a Fabric-oriented adapter. It should be understood as a reference path for future work, not as complete Hyperledger Fabric support.
 
 ## Deterministic Findings

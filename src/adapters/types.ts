@@ -1,7 +1,9 @@
 import type { CheckContext, DiagnosticCheckResult } from "../core/types.js";
 
+export type AdapterContext = Readonly<Pick<CheckContext, "cwd" | "env">>;
+
 export interface DiagnosticAdapter {
-  name: string;
-  description: string;
-  run(context: CheckContext): Promise<DiagnosticCheckResult[]>;
+  readonly name: string;
+  readonly description: string;
+  run(context: AdapterContext): Promise<readonly DiagnosticCheckResult[]>;
 }

@@ -19,9 +19,8 @@ export interface DiagnosticCheckResult {
 }
 
 export interface CheckContext {
-  cwd: string;
-  env: NodeJS.ProcessEnv;
-  adapter?: string;
+  readonly cwd: string;
+  readonly env: Readonly<NodeJS.ProcessEnv>;
 }
 
 export interface DoctorOptions {

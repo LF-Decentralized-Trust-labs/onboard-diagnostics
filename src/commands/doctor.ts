@@ -10,8 +10,7 @@ const PACKAGE_JSON_PATH = fileURLToPath(new URL("../../package.json", import.met
 export async function runDoctor(options: DoctorOptions): Promise<number> {
   const context: CheckContext = {
     cwd: process.cwd(),
-    env: process.env,
-    adapter: options.adapter
+    env: process.env
   };
 
   const results = await runCoreChecks(context);
