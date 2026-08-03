@@ -13,8 +13,9 @@
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist",
     "doctor": "node dist/index.js doctor",
-    "test": "npm run build && npm run test:doctor",
-    "test:doctor": "node --test test/doctor.test.mjs"
+    "test": "npm run build && npm run test:doctor && npm run test:adapters",
+    "test:doctor": "node --test test/doctor.test.mjs",
+    "test:adapters": "node --test test/adapters.test.mjs"
   },
   "keywords": [
     "onboarding",
