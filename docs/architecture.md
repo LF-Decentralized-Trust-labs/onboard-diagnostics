@@ -1,6 +1,6 @@
 # Architecture
 
-IDOA is structured as a small layered diagnostics implementation for onboarding readiness. The goal is to keep early checks deterministic and low-friction while leaving a clean path for deeper system-specific diagnostics later.
+Onboarding Diagnostics is structured as a small layered diagnostics implementation for onboarding readiness. The goal is to keep early checks deterministic and low-friction while leaving a clean path for deeper system-specific diagnostics later.
 
 ## Layer 1: Preflight Layer
 
@@ -17,7 +17,7 @@ This layer exists so onboarding can fail early in a way that is understandable e
 
 ## Layer 2: CLI Diagnostics Layer
 
-The CLI diagnostics layer is exposed as `idoa doctor`.
+The CLI diagnostics layer is exposed as `onboarding-diagnostics doctor`.
 
 This layer runs once baseline prerequisites are available and produces structured findings for:
 
@@ -71,7 +71,7 @@ This model keeps diagnostics interpretable for both humans and automation. It al
 
 Human-readable output is important for first-run operator experience, but machine-readable JSON is a core design goal.
 
-`idoa doctor --json` should make it possible to:
+`onboarding-diagnostics doctor --json` should make it possible to:
 
 - feed findings into CI or scripted setup flows
 - compare onboarding results across environments

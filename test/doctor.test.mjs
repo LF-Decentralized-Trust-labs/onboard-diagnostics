@@ -60,7 +60,7 @@ function runDoctor({
 }
 
 function createWorkspaceFixture() {
-  const fixtureDir = mkdtempSync(join(tmpdir(), "idoa-doctor-test-"));
+  const fixtureDir = mkdtempSync(join(tmpdir(), "onboarding-diagnostics-doctor-test-"));
 
   writeFileSync(
     join(fixtureDir, "package.json"),
@@ -102,11 +102,22 @@ test("doctor human-readable output shows PASS and WARN markers for a controlled 
 
   assert.equal(result.status, 0);
   assert.equal(result.stderr, "");
-  assert.match(result.stdout, /^IDOA doctor/m);
+  assert.match(result.stdout, /^Onboarding Diagnostics doctor/m);
   assert.match(result.stdout, /^Track: Onboarding Diagnostics Lab$/m);
   assert.match(result.stdout, /\[PASS\]/);
   assert.match(result.stdout, /\[WARN\]/);
   assert.match(result.stdout, /Summary: PASS=\d+ WARN=\d+ FAIL=0/);
+});
+
+test("doctor recognizes the repository root after the scoped package rename", () => {
+  const result = runDoctor();
+
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /^\[PASS\] Working directory sanity$/m);
+  assert.match(
+    result.stdout,
+    /package\.json with name "@onboarding-diagnostics-lab\/onboarding-diagnostics"/
+  );
 });
 
 test("doctor human-readable output shows FAIL markers when PATH is intentionally empty", () => {
@@ -137,7 +148,7 @@ test("doctor JSON output is valid and includes automation-friendly fields with P
 
   const report = JSON.parse(result.stdout);
 
-  assert.equal(report.tool, "idoa");
+  assert.equal(report.tool, "onboarding-diagnostics");
   assert.equal(typeof report.version, "string");
   assert.equal(typeof report.generated_at, "string");
   assert.equal(report.adapter, undefined);
@@ -183,9 +194,11 @@ test("preflight human-readable output follows doctor-style result blocks", { ski
 
   assert.equal(result.status, 0);
   assert.equal(result.stderr, "");
-  assert.match(result.stdout, /^IDOA preflight/m);
+  assert.match(result.stdout, /^Onboarding Diagnostics preflight/m);
   assert.match(result.stdout, /^Track: Onboarding Diagnostics Lab$/m);
   assert.match(result.stdout, /^\[PASS\] Node\.js availability$/m);
+  assert.match(result.stdout, /^\[PASS\] npx availability$/m);
+  assert.match(result.stdout, /^\[PASS\] Node\.js version compatibility$/m);
   assert.match(result.stdout, /^  id: preflight:node-available$/m);
   assert.match(result.stdout, /^  category: DEPENDENCY$/m);
   assert.match(result.stdout, /^  summary: Node\.js is available on PATH\.$/m);
@@ -194,6 +207,10 @@ test("preflight human-readable output follows doctor-style result blocks", { ski
   assert.match(result.stdout, /^\[PASS\] Shell availability$/m);
   assert.match(result.stdout, /^\[PASS\] Working directory writability$/m);
   assert.match(result.stdout, /^Summary: PASS=\d+ WARN=\d+ FAIL=0$/m);
+  assert.match(
+    result.stdout,
+    /^NEXT STEP: .+@onboarding-diagnostics-lab\/onboarding-diagnostics doctor.+$/m
+  );
   assert.doesNotMatch(result.stdout, /^PASS\s{2,}/m);
   assert.doesNotMatch(result.stdout, /zero-dependency baseline checks|intentionally runs/);
 });
@@ -217,8 +234,34 @@ test("preflight human-readable output shows FAIL blocks and summary when PATH is
   );
   assert.match(result.stdout, /^\[FAIL\] PATH sanity$/m);
   assert.match(result.stdout, /^\[FAIL\] Shell availability$/m);
-  assert.match(result.stdout, /^Summary: PASS=\d+ WARN=\d+ FAIL=4$/m);
+  assert.match(result.stdout, /^\[FAIL\] npx availability$/m);
+  assert.match(result.stdout, /^Summary: PASS=\d+ WARN=\d+ FAIL=5$/m);
+  assert.match(result.stdout, /^NEXT STEP: Fix the FAIL results above, then rerun this preflight script\.$/m);
   assert.doesNotMatch(result.stdout, /^FAIL\s{2,}/m);
+});
+
+test("preflight fails when Node.js is older than version 20", {
+  skip: skipPreflightTests
+}, (t) => {
+  const fixtureBin = mkdtempSync(join(tmpdir(), "onboarding-diagnostics-preflight-bin-"));
+  const fakeNodePath = join(fixtureBin, "node");
+  writeFileSync(fakeNodePath, "#!/bin/sh\nprintf 'v18.20.0\\n'\n");
+  chmodSync(fakeNodePath, 0o755);
+  t.after(() => rmSync(fixtureBin, { recursive: true, force: true }));
+
+  const result = runPreflight({
+    env: createPreflightEnv({
+      PATH: `${fixtureBin}:${controlledPreflightPath}`
+    })
+  });
+
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /^\[FAIL\] Node\.js version compatibility$/m);
+  assert.match(
+    result.stdout,
+    /Detected v18\.20\.0; Onboarding Diagnostics requires Node\.js 20 or newer\./
+  );
+  assert.match(result.stdout, /suggested_fix: Upgrade to Node\.js 20 or newer, then rerun preflight\./);
 });
 
 test("preflight warns when PATH contains missing or empty entries", {
@@ -226,7 +269,7 @@ test("preflight warns when PATH contains missing or empty entries", {
 }, () => {
   const result = runPreflight({
     env: createPreflightEnv({
-      PATH: `${controlledPreflightPath}::/idoa/missing-path-entry`
+      PATH: `${controlledPreflightPath}::/onboarding-diagnostics/missing-path-entry`
     })
   });
 
@@ -246,7 +289,7 @@ test("preflight warns when the configured shell cannot be resolved", {
 }, () => {
   const result = runPreflight({
     env: createPreflightEnv({
-      SHELL: "/idoa/missing-shell"
+      SHELL: "/onboarding-diagnostics/missing-shell"
     })
   });
 
@@ -263,7 +306,7 @@ test("preflight warns when the configured shell cannot be resolved", {
 test("preflight warns when the working directory is not writable", {
   skip: skipPreflightTests
 }, (t) => {
-  const fixtureDir = mkdtempSync(join(tmpdir(), "idoa-preflight-test-"));
+  const fixtureDir = mkdtempSync(join(tmpdir(), "onboarding-diagnostics-preflight-test-"));
   chmodSync(fixtureDir, 0o555);
   t.after(() => {
     chmodSync(fixtureDir, 0o755);

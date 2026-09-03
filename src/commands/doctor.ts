@@ -39,7 +39,7 @@ export async function runDoctor(options: DoctorOptions): Promise<number> {
 
 async function createReport(results: DoctorReport["results"], adapter?: string): Promise<DoctorReport> {
   return {
-    tool: "idoa",
+    tool: "onboarding-diagnostics",
     version: await readVersion(),
     generated_at: new Date().toISOString(),
     adapter,
@@ -59,7 +59,7 @@ async function readVersion(): Promise<string> {
 }
 
 function printHumanReport(report: DoctorReport) {
-  process.stdout.write("IDOA doctor\n");
+  process.stdout.write("Onboarding Diagnostics doctor\n");
   process.stdout.write("Track: Onboarding Diagnostics Lab\n");
   process.stdout.write(`Version: ${report.version}\n`);
   process.stdout.write(`Generated: ${report.generated_at}\n`);

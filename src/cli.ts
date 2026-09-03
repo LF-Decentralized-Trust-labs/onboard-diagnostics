@@ -36,5 +36,7 @@ export function printUsage() {
   process.stdout.write("  node dist/index.js doctor --json\n");
   process.stdout.write("  node dist/index.js doctor --adapter fabric\n");
   process.stdout.write("\n");
-  process.stdout.write("The CLI also works via `npm link` as `idoa doctor` once built.\n");
+  process.stdout.write(
+    "The CLI also works via `npm link` as `onboarding-diagnostics doctor` once built.\n"
+  );
 }

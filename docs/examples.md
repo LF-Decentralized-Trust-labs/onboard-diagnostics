@@ -3,8 +3,8 @@
 ## Terminal Output
 
 ```text
-$ idoa doctor
-IDOA doctor
+$ onboarding-diagnostics doctor
+Onboarding Diagnostics doctor
 Track: Onboarding Diagnostics Lab
 Version: 0.1.0
 Generated: 2026-04-14T10:00:00.000Z
@@ -37,8 +37,8 @@ Adapter: core
 [PASS] Working directory sanity
   id: core:working-directory
   category: CONFIGURATION
-  summary: Current working directory looks like the IDOA repository root.
-  details: Found package.json with name "idoa" in /workspace/onboard-diagnostics.
+  summary: Current working directory looks like the Onboarding Diagnostics repository root.
+  details: Found package.json with name "@onboarding-diagnostics-lab/onboarding-diagnostics" in /workspace/onboard-diagnostics.
 
 Summary: PASS=5 WARN=0 FAIL=0
 ```
@@ -47,7 +47,7 @@ Summary: PASS=5 WARN=0 FAIL=0
 
 ```json
 {
-  "tool": "idoa",
+  "tool": "onboarding-diagnostics",
   "version": "0.1.0",
   "generated_at": "2026-04-14T10:00:00.000Z",
   "summary": {
@@ -93,8 +93,8 @@ Summary: PASS=5 WARN=0 FAIL=0
       "title": "Working directory sanity",
       "status": "PASS",
       "category": "CONFIGURATION",
-      "summary": "Current working directory looks like the IDOA repository root.",
-      "details": "Found package.json with name \"idoa\" in /workspace/onboard-diagnostics."
+      "summary": "Current working directory looks like the Onboarding Diagnostics repository root.",
+      "details": "Found package.json with name \"@onboarding-diagnostics-lab/onboarding-diagnostics\" in /workspace/onboard-diagnostics."
     }
   ]
 }

@@ -162,31 +162,59 @@ check_shell() {
   fi
 }
 
-printf 'IDOA preflight\n'
+printf 'Onboarding Diagnostics preflight\n'
 printf 'Track: Onboarding Diagnostics Lab\n'
 printf 'Layer: preflight\n\n'
 
 check_command "node" "preflight:node-available" "Node.js availability" "Node.js"
 check_command "npm" "preflight:npm-available" "npm availability" "npm"
+check_command "npx" "preflight:npx-available" "npx availability" "npx"
 check_path
 
 if command -v node >/dev/null 2>&1; then
   if node_version=$(node -v 2>/dev/null); then
-    print_result \
-      "PASS" \
-      "preflight:node-version-visible" \
-      "Node.js version visibility" \
-      "ENVIRONMENT" \
-      "Node.js reports a version." \
-      "Detected $node_version from node -v."
+    node_major=$(printf '%s' "$node_version" | sed 's/^v//' | cut -d. -f1)
+    case "$node_major" in
+      ''|*[!0-9]*)
+        print_result \
+          "FAIL" \
+          "preflight:node-version-compatible" \
+          "Node.js version compatibility" \
+          "ENVIRONMENT" \
+          "Node.js reported an unrecognized version." \
+          "Detected $node_version from node -v." \
+          "Install Node.js 20 or newer, then rerun preflight."
+        ;;
+      *)
+        if [ "$node_major" -ge 20 ]; then
+          print_result \
+            "PASS" \
+            "preflight:node-version-compatible" \
+            "Node.js version compatibility" \
+            "ENVIRONMENT" \
+            "Node.js meets the minimum supported version." \
+            "Detected $node_version; Onboarding Diagnostics requires Node.js 20 or newer."
+        else
+          print_result \
+            "FAIL" \
+            "preflight:node-version-compatible" \
+            "Node.js version compatibility" \
+            "ENVIRONMENT" \
+            "Node.js is older than the minimum supported version." \
+            "Detected $node_version; Onboarding Diagnostics requires Node.js 20 or newer." \
+            "Upgrade to Node.js 20 or newer, then rerun preflight."
+        fi
+        ;;
+    esac
   else
     print_result \
-      "WARN" \
-      "preflight:node-version-visible" \
-      "Node.js version visibility" \
+      "FAIL" \
+      "preflight:node-version-compatible" \
+      "Node.js version compatibility" \
       "ENVIRONMENT" \
       "Node.js is available, but its version could not be read." \
-      "The preflight layer could resolve node but node -v did not return a version."
+      "The preflight layer could resolve node but node -v did not return a version." \
+      "Install Node.js 20 or newer, then rerun preflight."
   fi
 fi
 
@@ -232,5 +260,13 @@ fi
 check_shell
 
 printf 'Summary: PASS=%s WARN=%s FAIL=%s\n' "$PASS_COUNT" "$WARN_COUNT" "$FAIL_COUNT"
+
+if [ "$FAIL_COUNT" -gt 0 ]; then
+  printf 'NEXT STEP: Fix the FAIL results above, then rerun this preflight script.\n'
+elif [ "$WARN_COUNT" -gt 0 ]; then
+  printf 'NEXT STEP: Review the WARN results above, then run `npx --yes @onboarding-diagnostics-lab/onboarding-diagnostics doctor`.\n'
+else
+  printf 'NEXT STEP: Run `npx --yes @onboarding-diagnostics-lab/onboarding-diagnostics doctor` for full diagnostics.\n'
+fi
 
 exit "$EXIT_CODE"

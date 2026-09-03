@@ -1,5 +1,5 @@
 {
-  "tool": "idoa",
+  "tool": "onboarding-diagnostics",
   "version": "0.1.0",
   "generated_at": "2026-04-14T10:00:00.000Z",
   "summary": {
@@ -45,8 +45,8 @@
       "title": "Working directory sanity",
       "status": "PASS",
       "category": "CONFIGURATION",
-      "summary": "Current working directory looks like the IDOA repository root.",
-      "details": "Found package.json with name \"idoa\" in /workspace/onboard-diagnostics."
+      "summary": "Current working directory looks like the Onboarding Diagnostics repository root.",
+      "details": "Found package.json with name \"@onboarding-diagnostics-lab/onboarding-diagnostics\" in /workspace/onboard-diagnostics."
     }
   ]
 }

@@ -21,7 +21,7 @@ test("built-in adapters expose stable names", () => {
 });
 
 test("Fabric adapter returns results that follow the core diagnostic format", async (t) => {
-  const fixtureDir = mkdtempSync(join(tmpdir(), "idoa-adapter-test-"));
+  const fixtureDir = mkdtempSync(join(tmpdir(), "onboarding-diagnostics-adapter-test-"));
   t.after(() => rmSync(fixtureDir, { recursive: true, force: true }));
 
   const adapter = getAdapter("fabric");

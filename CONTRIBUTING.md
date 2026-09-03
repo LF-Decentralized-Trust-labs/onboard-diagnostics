@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are welcome. This project focuses on onboarding diagnostics and CLI tooling, with `idoa doctor` as the main command surface.
+Contributions are welcome. This project focuses on onboarding diagnostics and CLI tooling, with `onboarding-diagnostics doctor` as the main command surface.
 
 Please also follow [GOVERNANCE.md](GOVERNANCE.md), [SECURITY.md](SECURITY.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
