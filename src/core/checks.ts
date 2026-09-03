@@ -11,6 +11,7 @@ import {
 import type { CheckContext, DiagnosticCheckResult } from "./types.js";
 
 const MIN_NODE_MAJOR = 20;
+const PACKAGE_NAME = "@onboarding-diagnostics-lab/onboarding-diagnostics";
 
 export async function runCoreChecks(context: CheckContext): Promise<DiagnosticCheckResult[]> {
   const results: DiagnosticCheckResult[] = [];
@@ -35,7 +36,7 @@ function checkNodeVersion(): DiagnosticCheckResult {
       status: "PASS",
       category: "ENVIRONMENT",
       summary: `Node.js ${actualVersion} satisfies the minimum supported major version.`,
-      details: `Detected Node.js ${actualVersion}; IDOA requires Node.js ${MIN_NODE_MAJOR}+ for the TypeScript CLI runtime.`
+      details: `Detected Node.js ${actualVersion}; Onboarding Diagnostics requires Node.js ${MIN_NODE_MAJOR}+ for the TypeScript CLI runtime.`
     });
   }
 
@@ -45,7 +46,7 @@ function checkNodeVersion(): DiagnosticCheckResult {
     status: "FAIL",
     category: "ENVIRONMENT",
     summary: `Node.js ${actualVersion} is below the supported major version.`,
-    details: `Detected Node.js ${actualVersion}; IDOA requires Node.js ${MIN_NODE_MAJOR}+ for the diagnostics layer.`,
+    details: `Detected Node.js ${actualVersion}; Onboarding Diagnostics requires Node.js ${MIN_NODE_MAJOR}+ for the diagnostics layer.`,
     suggested_fix: remediationForNodeVersion(MIN_NODE_MAJOR)
   });
 }
@@ -119,14 +120,14 @@ async function checkWorkingDirectory(context: CheckContext): Promise<DiagnosticC
     const raw = await readFile(packageJsonPath, "utf8");
     const parsed = JSON.parse(raw) as { name?: string };
 
-    if (parsed.name === "idoa") {
+    if (parsed.name === PACKAGE_NAME) {
       return createResult({
         id: "core:working-directory",
         title: "Working directory sanity",
         status: "PASS",
         category: "CONFIGURATION",
-        summary: "Current working directory looks like the IDOA repository root.",
-        details: `Found package.json with name "idoa" in ${context.cwd}.`
+        summary: "Current working directory looks like the Onboarding Diagnostics repository root.",
+        details: `Found package.json with name "${PACKAGE_NAME}" in ${context.cwd}.`
       });
     }
 
@@ -135,7 +136,7 @@ async function checkWorkingDirectory(context: CheckContext): Promise<DiagnosticC
       title: "Working directory sanity",
       status: "WARN",
       category: "CONFIGURATION",
-      summary: "Current working directory is a project workspace, but not the IDOA repository root.",
+      summary: "Current working directory is a project workspace, but not the Onboarding Diagnostics repository root.",
       details: `Found package.json${parsed.name ? ` with name "${parsed.name}"` : ""} in ${context.cwd}.`,
       suggested_fix: remediationForUnexpectedWorkspace()
     });

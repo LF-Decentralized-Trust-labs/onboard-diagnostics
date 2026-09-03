@@ -1,6 +1,6 @@
 # IDOA - Infrastructure for Deterministic Onboarding & Analysis
 
-IDOA is the implementation repository for the Onboarding Diagnostics Lab workstream. Its purpose is to make onboarding failures deterministic, interpretable, and actionable before developers lose time chasing ambiguous local setup issues.
+Onboarding Diagnostics is the implementation repository for the Onboarding Diagnostics Lab workstream. Its purpose is to make onboarding failures deterministic, interpretable, and actionable before developers lose time chasing ambiguous local setup issues.
 
 ## Part of LF Decentralized Trust Labs – Onboarding Diagnostics Lab
 
@@ -20,21 +20,21 @@ Those failures are costly because they are often:
 
 ## Project Goal
 
-IDOA provides a small diagnostics-oriented implementation track for onboarding readiness:
+Onboarding Diagnostics provides a small diagnostics-oriented implementation track for onboarding readiness:
 
 - a zero-dependency preflight layer for first-run environment validation
-- a Node.js CLI diagnostics layer via `idoa doctor`
+- a Node.js CLI diagnostics layer via `onboarding-diagnostics doctor`
 - a minimal adapter model for system-specific checks
 
 The current target direction is Hyperledger Fabric, but Fabric support is not presented here as complete.
 
 ## Layered Architecture
 
-IDOA is organized as three layers:
+Onboarding Diagnostics is organized as three layers:
 
 1. `scripts/preflight.sh`
    A zero-dependency shell layer for baseline readiness checks before relying on Node.js tooling.
-2. `idoa doctor`
+2. `onboarding-diagnostics doctor`
    A TypeScript CLI diagnostics layer for deterministic human-readable and JSON reports.
 3. `src/adapters/*`
    A small adapter layer for target-specific checks that reuse the shared result model.
@@ -48,8 +48,8 @@ See [architecture.md](docs/architecture.md) for the detailed design notes.
 The repository currently includes:
 
 - a zero-dependency preflight script for baseline environment readiness
-- a minimal `idoa doctor` command with deterministic `PASS`/`WARN`/`FAIL` output
-- JSON output support via `idoa doctor --json`
+- a minimal `onboarding-diagnostics doctor` command with deterministic `PASS`/`WARN`/`FAIL` output
+- JSON output support via `onboarding-diagnostics doctor --json`
 - a shared result model for future adapter checks
 - a lightweight Fabric-oriented adapter path as an initial direction, not a finished integration
 
@@ -72,7 +72,31 @@ A compact project roadmap is in [ROADMAP.md](ROADMAP.md).
 
 ## Usage
 
-Run the zero-dependency preflight first:
+### Bootstrap from a release
+
+The npm package is named `@onboarding-diagnostics-lab/onboarding-diagnostics`; it exposes the `onboarding-diagnostics` CLI command.
+
+On macOS or Linux, download and run the zero-dependency preflight before invoking the package:
+
+```sh
+curl -fsSLo onboarding-diagnostics-preflight.sh https://raw.githubusercontent.com/LF-Decentralized-Trust-labs/onboard-diagnostics/main/scripts/preflight.sh
+sh onboarding-diagnostics-preflight.sh
+npx --yes @onboarding-diagnostics-lab/onboarding-diagnostics doctor
+```
+
+On Windows PowerShell:
+
+```powershell
+Invoke-WebRequest https://raw.githubusercontent.com/LF-Decentralized-Trust-labs/onboard-diagnostics/main/scripts/preflight.ps1 -OutFile onboarding-diagnostics-preflight.ps1
+powershell -ExecutionPolicy Bypass -File .\onboarding-diagnostics-preflight.ps1
+npx --yes @onboarding-diagnostics-lab/onboarding-diagnostics doctor
+```
+
+Both preflight scripts validate Node.js 20 or newer, npm, npx, PATH, shell availability, and working-directory access. Each run ends with an actionable `NEXT STEP`.
+
+### Work from a local checkout
+
+Run the local zero-dependency preflight first:
 
 ```sh
 sh scripts/preflight.sh
@@ -97,7 +121,13 @@ Optional local linking after build:
 
 ```sh
 npm link
-idoa doctor
+onboarding-diagnostics doctor
+```
+
+Validate the exact npm tarball contents and a clean temporary install:
+
+```sh
+npm run test:distribution
 ```
 
 ## Output Model

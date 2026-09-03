@@ -27,6 +27,6 @@ async function main() {
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? error.stack ?? error.message : String(error);
-  process.stderr.write(`IDOA CLI error: ${message}\n`);
+  process.stderr.write(`Onboarding Diagnostics CLI error: ${message}\n`);
   process.exitCode = 1;
 });

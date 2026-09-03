@@ -1,21 +1,31 @@
 {
-  "name": "idoa",
+  "name": "@onboarding-diagnostics-lab/onboarding-diagnostics",
   "version": "0.1.0",
   "description": "Implementation repo for the Onboarding Diagnostics Lab",
   "type": "module",
   "bin": {
-    "idoa": "./dist/index.js"
+    "onboarding-diagnostics": "dist/index.js"
   },
   "engines": {
     "node": ">=20"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "scripts/preflight.sh",
+    "scripts/preflight.ps1"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist",
     "doctor": "node dist/index.js doctor",
-    "test": "npm run build && npm run test:doctor && npm run test:adapters",
+    "prepack": "npm run build",
+    "test": "npm run build && npm run test:doctor && npm run test:adapters && npm run test:distribution",
     "test:doctor": "node --test test/doctor.test.mjs",
-    "test:adapters": "node --test test/adapters.test.mjs"
+    "test:adapters": "node --test test/adapters.test.mjs",
+    "test:distribution": "node --test test/distribution.test.mjs"
   },
   "keywords": [
     "onboarding",

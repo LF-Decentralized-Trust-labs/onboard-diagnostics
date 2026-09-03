@@ -51,7 +51,7 @@ async function checkFabricMarker(cwd: string, marker: string): Promise<Diagnosti
       status: "WARN",
       category: "CONFIGURATION",
       summary: `${marker} is not present in the current workspace.`,
-      details: `IDOA looked for ${targetPath} as a lightweight indicator of Hyperledger Fabric setup readiness.`,
+      details: `Onboarding Diagnostics looked for ${targetPath} as a lightweight indicator of Hyperledger Fabric setup readiness.`,
       suggested_fix: remediationForMissingFile(marker)
     });
   }
